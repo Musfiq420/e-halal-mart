@@ -1,0 +1,105 @@
+# =========================
+
+# Node / Package Managers
+
+# =========================
+
+node_modules/
+.pnpm-store/
+.npm/
+.yarn/
+
+# Lock files (keep pnpm only)
+
+package-lock.json
+yarn.lock
+
+# =========================
+
+# Next.js
+
+# =========================
+
+.next/
+out/
+build/
+
+# =========================
+
+# Logs
+
+# =========================
+
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# =========================
+
+# Environment Variables
+
+# =========================
+
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# =========================
+
+# OS / Editor
+
+# =========================
+
+.DS_Store
+Thumbs.db
+
+# VS Code
+
+.vscode/
+
+# =========================
+
+# Testing
+
+# =========================
+
+coverage/
+
+# =========================
+
+# Misc
+
+# =========================
+
+*.pem
+.cache/
+dist/
+
+# =========================
+
+# TypeScript
+
+# =========================
+
+*.tsbuildinfo
+
+# =========================
+
+# Tailwind / PostCSS cache
+
+# =========================
+
+.postcss-cache/
+
+# =========================
+
+# Vercel
+
+# =========================
+
+.vercel/
