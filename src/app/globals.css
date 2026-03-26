@@ -1,0 +1,172 @@
+@import "tailwindcss";
+
+@theme {
+  /* Brand Colors for E-Halal Mart */
+  --color-primary: #4CAF50;
+  --color-primary-light: #66BB6A;
+  --color-primary-dark: #388E3C;
+  --color-primary-foreground: #FFFFFF;
+
+  --color-dark-green: #1B5E20;
+  --color-dark-green-light: #2E7D32;
+  --color-dark-green-foreground: #FFFFFF;
+
+  --color-light-green: #A5D6A7;
+  --color-light-green-dark: #81C784;
+  --color-light-green-foreground: #1B5E20;
+
+  --color-accent-beige: #F5F0E8;
+  --color-accent-brown: #D7CCC8;
+  --color-accent-earth: #8D6E63;
+
+  /* CSS Variables for shadcn/ui compatibility */
+  --color-background: hsl(0 0% 100%);
+  --color-foreground: hsl(142 30% 15%);
+  --color-card: hsl(0 0% 100%);
+  --color-card-foreground: hsl(142 30% 15%);
+  --color-popover: hsl(0 0% 100%);
+  --color-popover-foreground: hsl(142 30% 15%);
+  --color-secondary: hsl(122 39% 95%);
+  --color-secondary-foreground: hsl(142 30% 15%);
+  --color-muted: hsl(0 0% 96%);
+  --color-muted-foreground: hsl(142 10% 40%);
+  --color-destructive: hsl(0 84% 60%);
+  --color-destructive-foreground: hsl(0 0% 100%);
+  --color-border: hsl(142 20% 90%);
+  --color-input: hsl(142 20% 90%);
+  --color-ring: hsl(122 39% 49%);
+
+  /* Border Radius */
+  --radius-lg: 0.75rem;
+  --radius-md: calc(0.75rem - 2px);
+  --radius-sm: calc(0.75rem - 4px);
+
+  /* Animations */
+  --animate-fade-in: fadeIn 0.5s ease-in-out;
+  --animate-slide-up: slideUp 0.5s ease-out;
+  --animate-slide-down: slideDown 0.3s ease-out;
+  --animate-scale-in: scaleIn 0.2s ease-out;
+  --animate-bounce-soft: bounceSoft 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes slideUp {
+  0% { transform: translateY(20px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideDown {
+  0% { transform: translateY(-10px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes scaleIn {
+  0% { transform: scale(0.95); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes bounceSoft {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* Dark mode */
+.dark {
+  --color-background: hsl(142 30% 8%);
+  --color-foreground: hsl(0 0% 98%);
+  --color-card: hsl(142 25% 12%);
+  --color-card-foreground: hsl(0 0% 98%);
+  --color-popover: hsl(142 25% 12%);
+  --color-popover-foreground: hsl(0 0% 98%);
+  --color-secondary: hsl(142 25% 20%);
+  --color-secondary-foreground: hsl(0 0% 98%);
+  --color-muted: hsl(142 20% 18%);
+  --color-muted-foreground: hsl(0 0% 65%);
+  --color-destructive: hsl(0 62% 50%);
+  --color-destructive-foreground: hsl(0 0% 98%);
+  --color-border: hsl(142 20% 20%);
+  --color-input: hsl(142 20% 20%);
+}
+
+/* Custom scrollbar styling */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #A5D6A7;
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #81C784;
+}
+
+/* Islamic geometric pattern overlay */
+.islamic-pattern-overlay {
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%234CAF50' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Smooth page transitions */
+.page-transition {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Product card hover effect */
+.product-card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.product-card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px -8px rgba(76, 175, 80, 0.2);
+}
+
+/* Gradient text for brand */
+.gradient-text {
+  background: linear-gradient(135deg, #4CAF50 0%, #1B5E20 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Focus visible styles for accessibility */
+.focus-ring:focus-visible {
+  outline: 2px solid #4CAF50;
+  outline-offset: 2px;
+}
+
+/* Loading skeleton animation */
+.skeleton-pulse {
+  animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes skeletonPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
