@@ -130,8 +130,8 @@ export default function Footer() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
                 <span className="text-white/70 text-sm">
-                  House 42, Road 5, Dhanmondi<br />
-                  Dhaka 1205, Bangladesh
+                  Mirpur<br />
+                  Dhaka, Bangladesh
                 </span>
               </li>
               <li className="flex items-center gap-3">
