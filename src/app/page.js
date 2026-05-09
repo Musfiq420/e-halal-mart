@@ -48,14 +48,19 @@ function HeroSection() {
               <span>100% Halal Certified</span>
             </div>
 
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-4 leading-tight">
+            {/* <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-4 leading-tight">
               Fresh & Halal
               <span className="block text-primary">Groceries For You</span>
+            </h1> */}
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-4 leading-tight">
+              Traditional with 
+              <span className="block text-primary">Trust and Halal</span> Assurance
+              
             </h1>
 
             <p className="text-gray-600 text-lg mb-6 max-w-lg mx-auto lg:mx-0">
-              Discover premium halal-certified meat, organic produce, and authentic Bengali groceries.
-              Quality you can trust, delivered to your doorstep.
+              <span className='text-2xl font-bold text-primary'>E-Halal Mart </span>
+               একটি বিশ্বস্ত, স্বাস্থ্যকর ও সম্পূর্ণ হালাল খাদ্য সরবরাহকারী প্রতিষ্ঠান।যেখানে ঘরে তৈরি, কেমিক্যালমুক্ত ও কাস্টমাইজড খাবার সহজলভ্য করার লক্ষ্যে কাজ করা হয়।
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
@@ -68,8 +73,8 @@ function HeroSection() {
                 </Link>
               </Button>
               <Button variant="outline" size="lg" asChild>
-                <Link href="/products?category=organic">
-                  Explore Organic
+                <Link href="/products?category=traditional">
+                  Explore Traditional
                 </Link>
               </Button>
             </div>

@@ -57,7 +57,7 @@ export default function Navbar() {
             </div>
             <div className="flex items-center gap-3">
               <a href="tel:+8801234567890" className="hover:text-light-green transition-colors">
-                📞 +880 1234-567890
+                📞 +880 1881-758835
               </a>
             </div>
           </div>
