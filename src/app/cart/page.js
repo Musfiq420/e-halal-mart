@@ -3,17 +3,47 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Button, CartItem, HalalBadge, OrganicBadge } from '@/components/e-halal';
 import { useCart } from '@/context/CartContext';
 import { useToast } from '@/context/ToastContext';
+import {
+  bangladeshCities,
+  getDeliveryCharge,
+  INSIDE_DHAKA_DELIVERY,
+  OUTSIDE_DHAKA_DELIVERY,
+} from '@/data/area';
+
+const initialCheckoutForm = {
+  name: '',
+  phone: '',
+  email: '',
+  address: '',
+  city: 'Dhaka',
+  area: '',
+  paymentMethod: 'Cash on Delivery',
+  notes: '',
+};
 
 export default function CartPage() {
-  const { items, itemCount, subtotal, clearCart, updateQuantity, removeFromCart } = useCart();
-  const { success } = useToast();
+  const { items, itemCount, subtotal, clearCart } = useCart();
+  const { success, error } = useToast();
   const [promoCode, setPromoCode] = useState('');
   const [isApplyingPromo, setIsApplyingPromo] = useState(false);
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
+  const [isOrderSubmitted, setIsOrderSubmitted] = useState(false);
+  const [checkoutForm, setCheckoutForm] = useState(initialCheckoutForm);
 
-  const deliveryFee = subtotal >= 1000 ? 0 : 50;
+  const selectedCity = bangladeshCities.find((city) => city.name === checkoutForm.city);
+  const deliveryFee = subtotal >= 1000 ? 0 : getDeliveryCharge(checkoutForm.city);
+  const deliveryLabel = selectedCity?.insideDhaka ? 'Inside Dhaka' : 'Outside Dhaka';
   const total = subtotal + deliveryFee;
 
   const handleApplyPromo = () => {
@@ -27,6 +57,84 @@ export default function CartPage() {
       }
     }, 1000);
   };
+
+  const handleCheckoutChange = (event) => {
+    const { name, value } = event.target;
+    setCheckoutForm((currentForm) => ({
+      ...currentForm,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmitOrder = async (event) => {
+    event.preventDefault();
+    setIsSubmittingOrder(true);
+
+    try {
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          customer: checkoutForm,
+          items: items.map((item) => ({
+            id: item.id,
+            name: item.name,
+            namebn: item.namebn,
+            price: item.price,
+            quantity: item.quantity,
+            unit: item.unit,
+          })),
+          summary: {
+            itemCount,
+            subtotal,
+            deliveryFee,
+            total,
+            promoCode: promoCode.trim() || null,
+          },
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result?.message || 'Could not place the order');
+      }
+
+      success('Order placed! We will contact you shortly.');
+      clearCart();
+      setPromoCode('');
+      setCheckoutForm(initialCheckoutForm);
+      setIsCheckoutOpen(false);
+      setIsOrderSubmitted(true);
+    } catch (err) {
+      error(err.message || 'Could not place the order');
+    } finally {
+      setIsSubmittingOrder(false);
+    }
+  };
+
+  if (isOrderSubmitted) {
+    return (
+      <div className="min-h-[70vh] bg-gray-50 px-4 py-12">
+        <div className="mx-auto flex max-w-xl flex-col items-center rounded-2xl bg-white p-8 text-center shadow-sm">
+          <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-light-green/40">
+            <svg className="h-10 w-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h1 className="mb-3 text-2xl font-bold text-gray-900">Your Order Has Been Submitted</h1>
+          <p className="mb-6 text-gray-500">
+            Your order is submitted for our team to review. Our team will contact you later.
+          </p>
+          <Button asChild>
+            <Link href="/products">Continue Shopping</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   if (items.length === 0) {
     return (
@@ -107,6 +215,9 @@ export default function CartPage() {
                     {deliveryFee === 0 ? 'Free' : `৳${deliveryFee}`}
                   </span>
                 </div>
+                <p className="text-xs text-gray-400">
+                  Based on {checkoutForm.city} ({deliveryLabel})
+                </p>
               </div>
 
               {/* Free Delivery Progress */}
@@ -159,7 +270,12 @@ export default function CartPage() {
               </div>
 
               {/* Checkout Button */}
-              <Button size="lg" fullWidth className="mb-3">
+              <Button
+                size="lg"
+                fullWidth
+                className="mb-3"
+                onClick={() => setIsCheckoutOpen(true)}
+              >
                 Proceed to Checkout
                 <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
@@ -213,7 +329,7 @@ export default function CartPage() {
               </div>
               <div>
                 <p className="font-medium text-gray-900">Inside Dhaka</p>
-                <p className="text-sm text-gray-500">Same day delivery for orders before 2 PM</p>
+                <p className="text-sm text-gray-500">Same day delivery, à§³{INSIDE_DHAKA_DELIVERY}</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -224,7 +340,7 @@ export default function CartPage() {
               </div>
               <div>
                 <p className="font-medium text-gray-900">Outside Dhaka</p>
-                <p className="text-sm text-gray-500">2-3 business days via courier</p>
+                <p className="text-sm text-gray-500">2-3 business days via courier, à§³{OUTSIDE_DHAKA_DELIVERY}</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -241,6 +357,181 @@ export default function CartPage() {
           </div>
         </div>
       </div>
+
+      <Dialog open={isCheckoutOpen} onOpenChange={setIsCheckoutOpen}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Checkout Details</DialogTitle>
+            <DialogDescription>
+              Fill in your delivery details to place this order.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form className="space-y-4" onSubmit={handleSubmitOrder}>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label htmlFor="name" className="mb-1.5 block text-sm font-medium text-gray-700">
+                  Full Name
+                </label>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  value={checkoutForm.name}
+                  onChange={handleCheckoutChange}
+                  required
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="phone" className="mb-1.5 block text-sm font-medium text-gray-700">
+                  Phone Number
+                </label>
+                <input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  value={checkoutForm.phone}
+                  onChange={handleCheckoutChange}
+                  required
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-gray-700">
+                  Email
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={checkoutForm.email}
+                  onChange={handleCheckoutChange}
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="city" className="mb-1.5 block text-sm font-medium text-gray-700">
+                  City
+                </label>
+                <select
+                  id="city"
+                  name="city"
+                  value={checkoutForm.city}
+                  onChange={handleCheckoutChange}
+                  required
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                >
+                  {bangladeshCities.map((city) => (
+                    <option key={city.name} value={city.name}>
+                      {city.name} - {city.insideDhaka ? 'Inside Dhaka' : 'Outside Dhaka'}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="area" className="mb-1.5 block text-sm font-medium text-gray-700">
+                Area
+              </label>
+              <input
+                id="area"
+                name="area"
+                type="text"
+                value={checkoutForm.area}
+                onChange={handleCheckoutChange}
+                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="address" className="mb-1.5 block text-sm font-medium text-gray-700">
+                Delivery Address
+              </label>
+              <textarea
+                id="address"
+                name="address"
+                value={checkoutForm.address}
+                onChange={handleCheckoutChange}
+                required
+                rows={3}
+                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="paymentMethod" className="mb-1.5 block text-sm font-medium text-gray-700">
+                Payment Method
+              </label>
+              <select
+                id="paymentMethod"
+                name="paymentMethod"
+                value={checkoutForm.paymentMethod}
+                onChange={handleCheckoutChange}
+                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+              >
+                <option>Cash on Delivery</option>
+                <option>bKash</option>
+                <option>Nagad</option>
+                <option>Card</option>
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="notes" className="mb-1.5 block text-sm font-medium text-gray-700">
+                Order Notes
+              </label>
+              <textarea
+                id="notes"
+                name="notes"
+                value={checkoutForm.notes}
+                onChange={handleCheckoutChange}
+                rows={2}
+                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+              />
+            </div>
+
+            <div className="rounded-lg bg-gray-50 p-4">
+              <div className="mb-3 flex items-center justify-between">
+                <span className="font-semibold text-gray-900">Order Total</span>
+                <span className="text-xl font-bold text-primary">৳ {total}</span>
+              </div>
+              <div className="space-y-2 text-sm text-gray-600">
+                {items.map((item) => (
+                  <div key={item.id} className="flex justify-between gap-3">
+                    <span>{item.name} x {item.quantity}</span>
+                    <span>৳ {item.price * item.quantity}</span>
+                  </div>
+                ))}
+                <div className="flex justify-between gap-3 border-t border-gray-200 pt-2">
+                  <span>Delivery ({checkoutForm.city})</span>
+                  <span>{deliveryFee === 0 ? 'Free' : `৳ ${deliveryFee}`}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsCheckoutOpen(false)}
+                disabled={isSubmittingOrder}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" loading={isSubmittingOrder}>
+                Submit Order
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
