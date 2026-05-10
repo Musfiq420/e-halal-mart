@@ -7,7 +7,7 @@ export const categories = [
     namebn: 'ঐতিহ্যবাহী খাবার',
     image: '/categories/traditional.png',
     description: 'Traditional Bengali dishes',
-    productCount: 3,
+    productCount: 4,
   },
 ];
 
