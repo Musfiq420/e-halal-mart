@@ -31,7 +31,7 @@ export default function Navbar() {
   const navLinks = [
     { href: '/', label: 'Home' },
     { href: '/products', label: 'Products' },
-    { href: '/products?filter=organic', label: 'Organic' },
+    { href: '/products?filter=traditional', label: 'Traditional' },
     { href: '/products?filter=new', label: 'New Arrivals' },
   ];
 
