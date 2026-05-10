@@ -237,7 +237,7 @@ export default function CartPage() {
               )}
 
               {/* Promo Code */}
-              <div className="py-4 border-b border-gray-100">
+              {/* <div className="py-4 border-b border-gray-100">
                 <label className="text-sm font-medium text-gray-700 mb-2 block">Promo Code</label>
                 <div className="flex gap-2">
                   <input
@@ -258,7 +258,7 @@ export default function CartPage() {
                   </Button>
                 </div>
                 <p className="text-xs text-gray-400 mt-2">Try: HALAL15 for 15% off</p>
-              </div>
+              </div> */}
 
               {/* Total */}
               <div className="py-4">
