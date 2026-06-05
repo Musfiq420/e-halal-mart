@@ -1,8 +1,60 @@
 import nodemailer from 'nodemailer';
+import { prisma } from '@/lib/prisma';
+import { auth } from '@/auth';
 
 export const runtime = 'nodejs';
 
 const ORDER_RECIPIENT = 'mahfuzaakter4772@gmail.com, mrifat46@gmail.com';
+
+function generateOrderNumber() {
+  const stamp = Date.now().toString(36).toUpperCase();
+  const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
+  return `EHM-${stamp}-${rand}`;
+}
+
+async function persistOrder({ customer, items, summary, userId }) {
+  // Only link order items to products that still exist (FK safety).
+  const productIds = items
+    .map((i) => Number(i.id))
+    .filter((id) => Number.isInteger(id));
+  const existing = productIds.length
+    ? await prisma.product.findMany({
+        where: { id: { in: productIds } },
+        select: { id: true },
+      })
+    : [];
+  const existingIds = new Set(existing.map((p) => p.id));
+
+  const toInt = (v) => Math.round(Number(v) || 0);
+
+  return prisma.order.create({
+    data: {
+      orderNumber: generateOrderNumber(),
+      userId: userId || null,
+      customerName: customer.name,
+      customerPhone: customer.phone,
+      customerEmail: customer.email || null,
+      address: customer.address,
+      city: customer.city,
+      area: customer.area || null,
+      paymentMethod: customer.paymentMethod,
+      notes: customer.notes || null,
+      itemCount: toInt(summary.itemCount) || items.reduce((s, i) => s + toInt(i.quantity), 0),
+      subtotal: toInt(summary.subtotal),
+      deliveryFee: toInt(summary.deliveryFee),
+      total: toInt(summary.total),
+      items: {
+        create: items.map((item) => ({
+          productId: existingIds.has(Number(item.id)) ? Number(item.id) : null,
+          name: item.name,
+          unit: item.unit || null,
+          price: toInt(item.price),
+          quantity: toInt(item.quantity),
+        })),
+      },
+    },
+  });
+}
 
 function escapeHtml(value = '') {
   return String(value)
@@ -163,24 +215,45 @@ export async function POST(request) {
       return Response.json({ message: 'Your cart is empty.' }, { status: 400 });
     }
 
-    const transporter = createTransporter();
-
-    if (!transporter) {
-      return Response.json({ message: 'Email service is not configured.' }, { status: 500 });
+    // Attach the order to the signed-in user when available (guest checkout otherwise).
+    let userId = null;
+    try {
+      const session = await auth();
+      userId = session?.user?.id || null;
+    } catch {
+      userId = null;
     }
 
-    await transporter.sendMail({
-      from: process.env.MAIL_FROM || process.env.SMTP_USER,
-      to: ORDER_RECIPIENT,
-      replyTo: order.customer.email || undefined,
-      subject: `New E-Halal Mart order from ${order.customer.name}`,
-      text: buildOrderText(order),
-      html: buildOrderHtml(order),
+    // Persist the order (primary action).
+    const saved = await persistOrder({
+      customer: order.customer,
+      items,
+      summary,
+      userId,
     });
 
-    return Response.json({ message: 'Order email sent.' });
+    // Send the notification email (best-effort — do not fail the order if it bounces).
+    try {
+      const transporter = createTransporter();
+      if (transporter) {
+        await transporter.sendMail({
+          from: process.env.MAIL_FROM || process.env.SMTP_USER,
+          to: ORDER_RECIPIENT,
+          replyTo: order.customer.email || undefined,
+          subject: `New E-Halal Mart order ${saved.orderNumber} from ${order.customer.name}`,
+          text: buildOrderText(order),
+          html: buildOrderHtml(order),
+        });
+      } else {
+        console.warn('Order email skipped: SMTP not configured.');
+      }
+    } catch (mailError) {
+      console.error('Order email failed (order still saved):', mailError);
+    }
+
+    return Response.json({ message: 'Order placed.', orderNumber: saved.orderNumber });
   } catch (error) {
-    console.error('Order email failed:', error);
-    return Response.json({ message: 'Could not send the order email.' }, { status: 500 });
+    console.error('Order creation failed:', error);
+    return Response.json({ message: 'Could not place the order.' }, { status: 500 });
   }
 }

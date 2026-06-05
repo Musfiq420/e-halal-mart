@@ -1,9 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { categories } from '@/data/products';
 
-export default function Footer() {
+export default function Footer({ categories = [] }) {
   const currentYear = new Date().getFullYear();
 
   const quickLinks = [

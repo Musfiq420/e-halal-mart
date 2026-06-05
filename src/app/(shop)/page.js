@@ -1,12 +1,15 @@
-'use client';
-
-import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ProductCard, CategoryCard, Button } from '@/components/e-halal';
-import { categories, featuredProducts, newProducts } from '@/data/products';
+import { getCategories, getFeaturedProducts, getNewProducts } from '@/lib/queries';
 
-export default function HomePage() {
+export default async function HomePage() {
+  const [categories, featuredProducts, newProducts] = await Promise.all([
+    getCategories(),
+    getFeaturedProducts(),
+    getNewProducts(),
+  ]);
+
   return (
     <div className="page-transition">
       {/* Hero Section */}
@@ -16,16 +19,16 @@ export default function HomePage() {
       <TrustBadges />
 
       {/* Categories Section */}
-      <CategoriesSection />
+      <CategoriesSection categories={categories} />
 
       {/* Featured Products */}
-      <FeaturedProducts />
+      <FeaturedProducts products={featuredProducts} />
 
       {/* Promotional Banner */}
       <PromoBanner />
 
       {/* New Arrivals */}
-      <NewArrivals />
+      <NewArrivals products={newProducts} />
 
       {/* Why Choose Us */}
       <WhyChooseUs />
@@ -196,7 +199,7 @@ function TrustBadges() {
   );
 }
 
-function CategoriesSection() {
+function CategoriesSection({ categories }) {
   return (
     <section className="py-12 md:py-16">
       <div className="container mx-auto px-4">
@@ -229,7 +232,7 @@ function CategoriesSection() {
   );
 }
 
-function FeaturedProducts() {
+function FeaturedProducts({ products }) {
   return (
     <section className="py-12 md:py-16 bg-white">
       <div className="container mx-auto px-4">
@@ -253,7 +256,7 @@ function FeaturedProducts() {
 
         {/* Products Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-          {featuredProducts.slice(0, 8).map((product) => (
+          {products.slice(0, 8).map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
@@ -310,7 +313,7 @@ function PromoBanner() {
   );
 }
 
-function NewArrivals() {
+function NewArrivals({ products }) {
   return (
     <section className="py-12 md:py-16 bg-white">
       <div className="container mx-auto px-4">
@@ -334,7 +337,7 @@ function NewArrivals() {
 
         {/* Products Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-          {newProducts.map((product) => (
+          {products.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
