@@ -1,5 +1,7 @@
 'use client';
 
+import { readableText } from '@/lib/color';
+
 const variants = {
   halal: 'bg-primary text-white',
   organic: 'bg-light-green text-dark-green',
@@ -67,5 +69,18 @@ export function SaleBadge({ size = 'md', className = '' }) {
     <Badge variant="sale" size={size} className={className}>
       Sale
     </Badge>
+  );
+}
+
+// Dynamic, admin-managed tag rendered in its chosen color.
+export function TagBadge({ tag, size = 'md', className = '' }) {
+  if (!tag) return null;
+  return (
+    <span
+      className={`inline-flex items-center font-medium rounded-full ${sizes[size]} ${className}`}
+      style={{ backgroundColor: tag.color, color: readableText(tag.color) }}
+    >
+      {tag.label}
+    </span>
   );
 }

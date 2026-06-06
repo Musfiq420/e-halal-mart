@@ -3,9 +3,27 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Button, ProductCard, HalalBadge, OrganicBadge, NewBadge } from '@/components/e-halal';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { Button, ProductCard, NewBadge, TagBadge } from '@/components/e-halal';
 import { useCart } from '@/context/CartContext';
 import { useToast } from '@/context/ToastContext';
+
+// Map Markdown elements to Tailwind-styled tags (avoids a typography plugin).
+const mdComponents = {
+  h1: (p) => <h3 className="text-lg font-bold text-gray-900 mt-4 mb-2" {...p} />,
+  h2: (p) => <h3 className="text-base font-bold text-gray-900 mt-4 mb-2" {...p} />,
+  h3: (p) => <h4 className="font-semibold text-gray-900 mt-3 mb-1" {...p} />,
+  p: (p) => <p className="mb-3 last:mb-0" {...p} />,
+  ul: (p) => <ul className="list-disc pl-5 mb-3 space-y-1" {...p} />,
+  ol: (p) => <ol className="list-decimal pl-5 mb-3 space-y-1" {...p} />,
+  strong: (p) => <strong className="font-semibold text-gray-900" {...p} />,
+  em: (p) => <em className="italic" {...p} />,
+  a: (p) => <a className="text-primary underline" target="_blank" rel="noopener noreferrer" {...p} />,
+  blockquote: (p) => (
+    <blockquote className="border-l-4 border-gray-200 pl-4 italic text-gray-500 my-3" {...p} />
+  ),
+};
 
 export default function ProductDetailClient({ product, relatedProducts = [] }) {
   return (
@@ -31,7 +49,15 @@ export default function ProductDetailClient({ product, relatedProducts = [] }) {
         {/* Product Description */}
         <div className="mt-8 bg-white rounded-2xl p-6">
           <h2 className="text-xl font-bold text-gray-900 mb-4">Description</h2>
-          <p className="text-gray-600 leading-relaxed">{product.description}</p>
+          <div className="text-gray-600 leading-relaxed">
+            {product.description ? (
+              <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>
+                {product.description}
+              </ReactMarkdown>
+            ) : (
+              <p className="text-gray-400">No description provided.</p>
+            )}
+          </div>
 
           {product.nutritionInfo && (
             <div className="mt-6">
@@ -79,9 +105,10 @@ function ProductImages({ product }) {
         />
 
         {/* Badges */}
-        <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
-          {product.isHalal && <HalalBadge />}
-          {product.isOrganic && <OrganicBadge />}
+        <div className="absolute top-4 left-4 flex flex-col items-start gap-2 z-10">
+          {(product.tags || []).map((t) => (
+            <TagBadge key={t.slug} tag={t} />
+          ))}
         </div>
 
         {product.isNew && (
@@ -338,25 +365,10 @@ function ProductInfo({ product }) {
 
       {/* Trust Badges */}
       <div className="mt-6 p-4 bg-light-green/20 rounded-xl">
-        <div className="flex flex-wrap gap-4">
-          {product.isHalal && (
-            <div className="flex items-center gap-2">
-              <span className="text-xl">☪</span>
-              <div>
-                <p className="text-xs font-semibold text-primary">Halal Certified</p>
-                <p className="text-xs text-gray-500">Verified source</p>
-              </div>
-            </div>
-          )}
-          {product.isOrganic && (
-            <div className="flex items-center gap-2">
-              <span className="text-xl">🌿</span>
-              <div>
-                <p className="text-xs font-semibold text-primary">Organic</p>
-                <p className="text-xs text-gray-500">Certified organic</p>
-              </div>
-            </div>
-          )}
+        <div className="flex flex-wrap items-center gap-3">
+          {(product.tags || []).map((t) => (
+            <TagBadge key={t.slug} tag={t} />
+          ))}
           <div className="flex items-center gap-2">
             <span className="text-xl">🚚</span>
             <div>

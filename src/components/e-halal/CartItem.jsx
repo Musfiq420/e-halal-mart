@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
-import { HalalBadge, OrganicBadge } from './Badge';
+import { TagBadge } from './Badge';
 
 export default function CartItem({ item, showControls = true, className = '' }) {
   const { updateQuantity, removeFromCart } = useCart();
@@ -14,8 +14,7 @@ export default function CartItem({ item, showControls = true, className = '' }) 
     namebn,
     price,
     image,
-    isHalal,
-    isOrganic,
+    tags = [],
     quantity,
     unit,
   } = item;
@@ -67,10 +66,13 @@ export default function CartItem({ item, showControls = true, className = '' }) 
         <p className="text-xs text-gray-500 mb-2">{namebn}</p>
 
         {/* Badges */}
-        <div className="flex gap-1.5 mb-2">
-          {isHalal && <HalalBadge size="sm" />}
-          {isOrganic && <OrganicBadge size="sm" />}
-        </div>
+        {tags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-2">
+            {tags.map((t) => (
+              <TagBadge key={t.slug} tag={t} size="sm" />
+            ))}
+          </div>
+        )}
 
         {/* Price and Quantity */}
         <div className="flex items-end justify-between gap-2">

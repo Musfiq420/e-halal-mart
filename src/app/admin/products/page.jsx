@@ -2,6 +2,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { deleteProduct } from "./actions";
+import ConfirmDeleteButton from "../ConfirmDeleteButton";
+import { readableText } from "@/lib/color";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +13,7 @@ function formatBDT(value) {
 
 export default async function AdminProductsPage() {
   const products = await prisma.product.findMany({
-    include: { category: true },
+    include: { category: true, tags: true },
     orderBy: { createdAt: "desc" },
   });
 
@@ -31,7 +33,7 @@ export default async function AdminProductsPage() {
       </div>
 
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm min-w-[640px]">
           <thead>
             <tr className="text-left text-gray-500 border-b border-gray-100">
               <th className="px-5 py-3 font-medium">Product</th>
@@ -75,8 +77,16 @@ export default async function AdminProductsPage() {
                     <div className="flex flex-wrap gap-1">
                       {p.isFeatured && <Badge>Featured</Badge>}
                       {p.isNew && <Badge>New</Badge>}
-                      {p.isOrganic && <Badge>Organic</Badge>}
                       {!p.inStock && <Badge tone="red">Out</Badge>}
+                      {p.tags.map((t) => (
+                        <span
+                          key={t.id}
+                          className="px-2 py-0.5 rounded-full text-[11px] font-medium"
+                          style={{ backgroundColor: t.color, color: readableText(t.color) }}
+                        >
+                          {t.label}
+                        </span>
+                      ))}
                     </div>
                   </td>
                   <td className="px-5 py-3">
@@ -84,10 +94,12 @@ export default async function AdminProductsPage() {
                       <Link href={`/admin/products/${p.id}/edit`} className="text-primary hover:underline">
                         Edit
                       </Link>
-                      <form action={deleteProduct}>
-                        <input type="hidden" name="id" value={p.id} />
-                        <DeleteButton />
-                      </form>
+                      <ConfirmDeleteButton
+                        action={deleteProduct}
+                        id={p.id}
+                        title="Delete product?"
+                        message={`“${p.name}” will be permanently removed. This action cannot be undone.`}
+                      />
                     </div>
                   </td>
                 </tr>
@@ -109,13 +121,5 @@ function Badge({ children, tone = "green" }) {
     <span className={`px-2 py-0.5 rounded-full text-[11px] font-medium ${tones[tone]}`}>
       {children}
     </span>
-  );
-}
-
-function DeleteButton() {
-  return (
-    <button type="submit" className="text-red-500 hover:underline">
-      Delete
-    </button>
   );
 }

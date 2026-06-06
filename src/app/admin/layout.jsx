@@ -9,9 +9,11 @@ export default async function AdminLayout({ children }) {
   const session = await requireAdmin();
 
   return (
-    <div className="flex min-h-screen bg-gray-50 text-gray-900">
+    <div className="min-h-screen bg-gray-50 text-gray-900">
       <AdminSidebar user={session.user} />
-      <main className="flex-1 min-w-0 p-6 md:p-8">{children}</main>
+      <div className="md:pl-60">
+        <main className="min-w-0 p-4 sm:p-6 md:p-8">{children}</main>
+      </div>
     </div>
   );
 }

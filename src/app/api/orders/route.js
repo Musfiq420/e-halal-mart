@@ -1,16 +1,11 @@
 import nodemailer from 'nodemailer';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
+import { generateOrderNumber } from '@/lib/orders';
 
 export const runtime = 'nodejs';
 
 const ORDER_RECIPIENT = 'mahfuzaakter4772@gmail.com, mrifat46@gmail.com';
-
-function generateOrderNumber() {
-  const stamp = Date.now().toString(36).toUpperCase();
-  const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
-  return `EHM-${stamp}-${rand}`;
-}
 
 async function persistOrder({ customer, items, summary, userId }) {
   // Only link order items to products that still exist (FK safety).

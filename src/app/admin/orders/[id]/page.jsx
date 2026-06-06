@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { updateOrderStatus, deleteOrder } from "../actions";
+import ConfirmDeleteButton from "../../ConfirmDeleteButton";
 
 const STATUSES = ["PENDING", "CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"];
 
@@ -37,12 +38,23 @@ export default async function AdminOrderDetailPage({ params }) {
             {new Date(order.createdAt).toLocaleString("en-GB")}
           </p>
         </div>
-        <form action={deleteOrder}>
-          <input type="hidden" name="id" value={order.id} />
-          <button type="submit" className="px-4 py-2 text-sm text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-colors">
-            Delete Order
-          </button>
-        </form>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <Link
+            href={`/admin/orders/${order.id}/edit`}
+            className="px-4 py-2 text-sm text-primary border border-primary/30 rounded-lg hover:bg-primary/5 transition-colors"
+          >
+            Edit
+          </Link>
+          <ConfirmDeleteButton
+            action={deleteOrder}
+            id={order.id}
+            triggerLabel="Delete"
+            triggerClassName="px-4 py-2 text-sm text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
+            title="Delete order?"
+            message={`Order ${order.orderNumber} and all its items will be permanently removed. This action cannot be undone.`}
+            confirmLabel="Delete Order"
+          />
+        </div>
       </div>
 
       {/* Status update */}
@@ -95,7 +107,7 @@ export default async function AdminOrderDetailPage({ params }) {
 
       {/* Items */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm min-w-[560px]">
           <thead>
             <tr className="text-left text-gray-500 border-b border-gray-100">
               <th className="px-5 py-3 font-medium">Product</th>

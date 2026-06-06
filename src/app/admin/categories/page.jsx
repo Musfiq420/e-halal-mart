@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { deleteCategory } from "./actions";
+import ConfirmDeleteButton from "../ConfirmDeleteButton";
 
 export const dynamic = "force-dynamic";
 
@@ -27,7 +28,7 @@ export default async function AdminCategoriesPage() {
       </div>
 
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm min-w-[520px]">
           <thead>
             <tr className="text-left text-gray-500 border-b border-gray-100">
               <th className="px-5 py-3 font-medium">Category</th>
@@ -63,10 +64,12 @@ export default async function AdminCategoriesPage() {
                         Edit
                       </Link>
                       {c._count.products === 0 ? (
-                        <form action={deleteCategory}>
-                          <input type="hidden" name="id" value={c.id} />
-                          <button type="submit" className="text-red-500 hover:underline">Delete</button>
-                        </form>
+                        <ConfirmDeleteButton
+                          action={deleteCategory}
+                          id={c.id}
+                          title="Delete category?"
+                          message={`“${c.name}” will be permanently removed. This action cannot be undone.`}
+                        />
                       ) : (
                         <span className="text-gray-300" title="Category has products">Delete</span>
                       )}

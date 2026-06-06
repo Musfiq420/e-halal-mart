@@ -1,11 +1,12 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState } from "react";
 import Link from "next/link";
+import MarkdownEditor from "../MarkdownEditor";
+import ImageUpload from "../ImageUpload";
+import { readableText } from "@/lib/color";
 
 const FLAGS = [
-  { key: "isHalal", label: "Halal" },
-  { key: "isOrganic", label: "Organic" },
   { key: "isFeatured", label: "Featured" },
   { key: "isNew", label: "New arrival" },
   { key: "inStock", label: "In stock" },
@@ -14,11 +15,11 @@ const FLAGS = [
 const field = "w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary";
 const labelCls = "block text-sm font-medium text-gray-700 mb-1";
 
-export default function ProductForm({ action, categories, product }) {
+export default function ProductForm({ action, categories, tags = [], product }) {
   const [state, formAction, pending] = useActionState(action, {});
-  const [preview, setPreview] = useState(product?.image || null);
 
   const isEdit = !!product;
+  const selectedTagIds = new Set((product?.tags || []).map((t) => t.id));
 
   return (
     <form action={formAction} className="space-y-6 max-w-3xl">
@@ -65,7 +66,10 @@ export default function ProductForm({ action, categories, product }) {
 
       <div>
         <label className={labelCls}>Description</label>
-        <textarea name="description" rows={5} defaultValue={product?.description || ""} className={field} />
+        <MarkdownEditor name="description" defaultValue={product?.description || ""} />
+        <p className="text-xs text-gray-400 mt-1">
+          Use the toolbar for headings, bold, and bullet lists — saved as Markdown.
+        </p>
       </div>
 
       <div>
@@ -75,30 +79,55 @@ export default function ProductForm({ action, categories, product }) {
 
       <div>
         <label className={labelCls}>Image</label>
-        <div className="flex items-center gap-4">
-          {preview && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={preview} alt="preview" className="w-20 h-20 object-cover rounded-lg border border-gray-200" />
-          )}
-          <input
-            type="file"
-            name="image"
-            accept="image/*"
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              if (f) setPreview(URL.createObjectURL(f));
-            }}
-            className="text-sm"
-          />
-        </div>
-        <p className="text-xs text-gray-400 mt-1">
-          {isEdit ? "Leave empty to keep the current image." : "Upload a product image."}
-        </p>
+        <ImageUpload
+          name="image"
+          defaultPreview={product?.image || null}
+          helpText={isEdit ? "Leave unchanged to keep the current image." : "Upload a product image."}
+        />
+      </div>
+
+      <div>
+        <label className={labelCls}>Tags</label>
+        {tags.length === 0 ? (
+          <p className="text-sm text-gray-400">
+            No tags yet.{" "}
+            <Link href="/admin/tags/new" className="text-primary hover:underline">
+              Create one
+            </Link>
+            .
+          </p>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {tags.map((t) => {
+              const checked = selectedTagIds.has(t.id);
+              return (
+                <label
+                  key={t.id}
+                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 text-sm cursor-pointer hover:bg-gray-50 has-[:checked]:border-transparent transition-colors"
+                  style={checked ? { backgroundColor: t.color, color: readableText(t.color) } : undefined}
+                >
+                  <input
+                    type="checkbox"
+                    name="tagIds"
+                    value={t.id}
+                    defaultChecked={checked}
+                    className="sr-only"
+                  />
+                  <span
+                    className="w-2.5 h-2.5 rounded-full"
+                    style={{ backgroundColor: checked ? readableText(t.color) : t.color }}
+                  />
+                  {t.label}
+                </label>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       <div className="flex flex-wrap gap-4">
         {FLAGS.map((f) => {
-          const checked = product ? !!product[f.key] : f.key === "isHalal" || f.key === "inStock";
+          const checked = product ? !!product[f.key] : f.key === "inStock";
           return (
             <label key={f.key} className="inline-flex items-center gap-2 text-sm text-gray-700">
               <input type="checkbox" name={f.key} defaultChecked={checked} className="w-4 h-4 accent-primary" />

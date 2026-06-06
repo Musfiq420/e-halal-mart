@@ -30,9 +30,17 @@ export default async function AdminOrdersPage({ searchParams }) {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Orders</h1>
-        <p className="text-gray-500 mt-1">{orders.length} {activeStatus === "ALL" ? "total" : activeStatus.toLowerCase()}</p>
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Orders</h1>
+          <p className="text-gray-500 mt-1">{orders.length} {activeStatus === "ALL" ? "total" : activeStatus.toLowerCase()}</p>
+        </div>
+        <Link
+          href="/admin/orders/new"
+          className="px-4 py-2.5 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-dark transition-colors whitespace-nowrap"
+        >
+          + New Order
+        </Link>
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -50,7 +58,7 @@ export default async function AdminOrdersPage({ searchParams }) {
       </div>
 
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm min-w-[680px]">
           <thead>
             <tr className="text-left text-gray-500 border-b border-gray-100">
               <th className="px-5 py-3 font-medium">Order</th>

@@ -14,8 +14,7 @@ function mapProduct(p) {
     category: p.category?.slug ?? null,
     image: p.image,
     images: p.images?.length ? p.images : p.image ? [p.image] : [],
-    isHalal: p.isHalal,
-    isOrganic: p.isOrganic,
+    tags: p.tags?.map((t) => ({ slug: t.slug, label: t.label, color: t.color })) ?? [],
     isFeatured: p.isFeatured,
     isNew: p.isNew,
     inStock: p.inStock,
@@ -43,7 +42,7 @@ function mapCategory(c) {
 
 export async function getProducts() {
   const products = await prisma.product.findMany({
-    include: { category: true },
+    include: { category: true, tags: true },
     orderBy: { createdAt: "desc" },
   });
   return products.map(mapProduct);
@@ -54,7 +53,7 @@ export async function getProductById(id) {
   if (!Number.isInteger(numId)) return null;
   const product = await prisma.product.findUnique({
     where: { id: numId },
-    include: { category: true },
+    include: { category: true, tags: true },
   });
   return mapProduct(product);
 }
@@ -62,7 +61,7 @@ export async function getProductById(id) {
 export async function getProductsByCategory(slug) {
   const products = await prisma.product.findMany({
     where: { category: { slug } },
-    include: { category: true },
+    include: { category: true, tags: true },
     orderBy: { createdAt: "desc" },
   });
   return products.map(mapProduct);
@@ -77,7 +76,7 @@ export async function getRelatedProducts(productId, limit = 4) {
   if (!product) return [];
   const related = await prisma.product.findMany({
     where: { categoryId: product.categoryId, id: { not: numId } },
-    include: { category: true },
+    include: { category: true, tags: true },
     take: limit,
   });
   return related.map(mapProduct);
@@ -86,7 +85,7 @@ export async function getRelatedProducts(productId, limit = 4) {
 export async function getFeaturedProducts() {
   const products = await prisma.product.findMany({
     where: { isFeatured: true },
-    include: { category: true },
+    include: { category: true, tags: true },
     orderBy: { createdAt: "desc" },
   });
   return products.map(mapProduct);
@@ -95,7 +94,7 @@ export async function getFeaturedProducts() {
 export async function getNewProducts() {
   const products = await prisma.product.findMany({
     where: { isNew: true },
-    include: { category: true },
+    include: { category: true, tags: true },
     orderBy: { createdAt: "desc" },
   });
   return products.map(mapProduct);

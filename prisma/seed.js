@@ -13,6 +13,11 @@ const categories = [
   },
 ];
 
+const tags = [
+  { slug: "halal", label: "Halal", color: "#16a34a" },
+  { slug: "organic", label: "Organic", color: "#84cc16" },
+];
+
 const products = [
   {
     id: 1,
@@ -23,8 +28,7 @@ const products = [
     categorySlug: "traditional",
     image: "/products/kumro_bori.png",
     images: ["/products/kumro_bori.png"],
-    isHalal: true,
-    isOrganic: false,
+    tagSlugs: ["halal"],
     isFeatured: true,
     isNew: false,
     inStock: true,
@@ -44,8 +48,7 @@ const products = [
     categorySlug: "traditional",
     image: "/products/mango_bar.png",
     images: ["/products/mango_bar.png"],
-    isHalal: true,
-    isOrganic: false,
+    tagSlugs: ["halal"],
     isFeatured: true,
     isNew: true,
     inStock: true,
@@ -65,8 +68,7 @@ const products = [
     categorySlug: "traditional",
     image: "/products/lobongo_lotika.png",
     images: ["/products/lobongo_lotika.png"],
-    isHalal: true,
-    isOrganic: false,
+    tagSlugs: ["halal"],
     isFeatured: true,
     isNew: true,
     inStock: true,
@@ -86,8 +88,7 @@ const products = [
     categorySlug: "traditional",
     image: "/products/nakshi_pitha.png",
     images: ["/products/nakshi_pitha.png"],
-    isHalal: true,
-    isOrganic: false,
+    tagSlugs: ["halal"],
     isFeatured: true,
     isNew: true,
     inStock: true,
@@ -112,13 +113,24 @@ async function main() {
     slugToId[c.slug] = category.id;
   }
 
+  const tagSlugToId = {};
+  for (const t of tags) {
+    const tag = await prisma.tag.upsert({
+      where: { slug: t.slug },
+      update: { label: t.label, color: t.color },
+      create: t,
+    });
+    tagSlugToId[t.slug] = tag.id;
+  }
+
   for (const p of products) {
-    const { categorySlug, ...rest } = p;
+    const { categorySlug, tagSlugs = [], ...rest } = p;
+    const tagConnect = tagSlugs.map((s) => ({ id: tagSlugToId[s] }));
     const data = { ...rest, categoryId: slugToId[categorySlug] };
     await prisma.product.upsert({
       where: { id: p.id },
-      update: data,
-      create: data,
+      update: { ...data, tags: { set: tagConnect } },
+      create: { ...data, tags: { connect: tagConnect } },
     });
   }
 
@@ -127,7 +139,7 @@ async function main() {
     `SELECT setval(pg_get_serial_sequence('"Product"', 'id'), (SELECT COALESCE(MAX(id), 1) FROM "Product"))`
   );
 
-  console.log(`Seeded ${categories.length} categories and ${products.length} products.`);
+  console.log(`Seeded ${categories.length} categories, ${tags.length} tags and ${products.length} products.`);
 }
 
 main()

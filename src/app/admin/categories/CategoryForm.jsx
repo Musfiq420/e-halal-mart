@@ -1,14 +1,14 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState } from "react";
 import Link from "next/link";
+import ImageUpload from "../ImageUpload";
 
 const field = "w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary";
 const labelCls = "block text-sm font-medium text-gray-700 mb-1";
 
 export default function CategoryForm({ action, category }) {
   const [state, formAction, pending] = useActionState(action, {});
-  const [preview, setPreview] = useState(category?.image || null);
   const isEdit = !!category;
 
   return (
@@ -46,25 +46,11 @@ export default function CategoryForm({ action, category }) {
 
       <div>
         <label className={labelCls}>Image</label>
-        <div className="flex items-center gap-4">
-          {preview && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={preview} alt="preview" className="w-20 h-20 object-cover rounded-lg border border-gray-200" />
-          )}
-          <input
-            type="file"
-            name="image"
-            accept="image/*"
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              if (f) setPreview(URL.createObjectURL(f));
-            }}
-            className="text-sm"
-          />
-        </div>
-        <p className="text-xs text-gray-400 mt-1">
-          {isEdit ? "Leave empty to keep the current image." : "Upload a category image."}
-        </p>
+        <ImageUpload
+          name="image"
+          defaultPreview={category?.image || null}
+          helpText={isEdit ? "Leave unchanged to keep the current image." : "Upload a category image."}
+        />
       </div>
 
       <div className="flex items-center gap-3 pt-2">

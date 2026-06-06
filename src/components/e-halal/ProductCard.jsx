@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import Button from './Button';
-import { HalalBadge, OrganicBadge, NewBadge, SaleBadge } from './Badge';
+import { NewBadge, TagBadge } from './Badge';
 import { useCart } from '@/context/CartContext';
 import { useToast } from '@/context/ToastContext';
 
@@ -21,8 +21,7 @@ export default function ProductCard({ product, className = '' }) {
     price,
     originalPrice,
     image: productImage,
-    isHalal,
-    isOrganic,
+    tags = [],
     isNew,
     inStock,
     unit,
@@ -73,9 +72,10 @@ export default function ProductCard({ product, className = '' }) {
           />
 
           {/* Badges Container */}
-          <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10">
-            {isHalal && <HalalBadge size="sm" />}
-            {isOrganic && <OrganicBadge size="sm" />}
+          <div className="absolute top-3 left-3 flex flex-col items-start gap-1.5 z-10">
+            {tags.map((t) => (
+              <TagBadge key={t.slug} tag={t} size="sm" />
+            ))}
           </div>
 
           {/* Sale/New Badge */}

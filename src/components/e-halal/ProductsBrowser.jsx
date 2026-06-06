@@ -60,11 +60,11 @@ function ProductsPageContent({ products, categories }) {
 
     // Special filters
     if (effectiveFilter === 'organic') {
-      result = result.filter(p => p.isOrganic);
+      result = result.filter(p => p.tags?.some(t => t.slug === 'organic'));
     } else if (effectiveFilter === 'new') {
       result = result.filter(p => p.isNew);
     } else if (effectiveFilter === 'halal') {
-      result = result.filter(p => p.isHalal);
+      result = result.filter(p => p.tags?.some(t => t.slug === 'halal'));
     } else if (effectiveFilter === 'sale') {
       result = result.filter(p => p.originalPrice !== null);
     }
