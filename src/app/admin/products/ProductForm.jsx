@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import Link from "next/link";
 import MarkdownEditor from "../MarkdownEditor";
 import ImageUpload from "../ImageUpload";
@@ -19,7 +19,15 @@ export default function ProductForm({ action, categories, tags = [], product }) 
   const [state, formAction, pending] = useActionState(action, {});
 
   const isEdit = !!product;
-  const selectedTagIds = new Set((product?.tags || []).map((t) => t.id));
+  const [selectedTags, setSelectedTags] = useState(
+    () => new Set((product?.tags || []).map((t) => t.id))
+  );
+  const toggleTag = (id) =>
+    setSelectedTags((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
 
   return (
     <form action={formAction} className="space-y-6 max-w-3xl">
@@ -97,31 +105,48 @@ export default function ProductForm({ action, categories, tags = [], product }) 
             .
           </p>
         ) : (
-          <div className="flex flex-wrap gap-2">
-            {tags.map((t) => {
-              const checked = selectedTagIds.has(t.id);
-              return (
-                <label
-                  key={t.id}
-                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 text-sm cursor-pointer hover:bg-gray-50 has-[:checked]:border-transparent transition-colors"
-                  style={checked ? { backgroundColor: t.color, color: readableText(t.color) } : undefined}
-                >
-                  <input
-                    type="checkbox"
-                    name="tagIds"
-                    value={t.id}
-                    defaultChecked={checked}
-                    className="sr-only"
-                  />
-                  <span
-                    className="w-2.5 h-2.5 rounded-full"
-                    style={{ backgroundColor: checked ? readableText(t.color) : t.color }}
-                  />
-                  {t.label}
-                </label>
-              );
-            })}
-          </div>
+          <>
+            <div className="flex flex-wrap gap-2">
+              {tags.map((t) => {
+                const checked = selectedTags.has(t.id);
+                return (
+                  <button
+                    type="button"
+                    key={t.id}
+                    onClick={() => toggleTag(t.id)}
+                    aria-pressed={checked}
+                    className={`inline-flex items-center gap-1.5 pl-2.5 pr-3 py-1.5 rounded-full border text-sm font-medium transition-all ${
+                      checked
+                        ? "border-transparent shadow-sm"
+                        : "border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50"
+                    }`}
+                    style={
+                      checked
+                        ? { backgroundColor: t.color, color: readableText(t.color) }
+                        : undefined
+                    }
+                  >
+                    {checked ? (
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    ) : (
+                      <span
+                        className="w-2.5 h-2.5 rounded-full ring-1 ring-black/5"
+                        style={{ backgroundColor: t.color }}
+                      />
+                    )}
+                    {t.label}
+                  </button>
+                );
+              })}
+            </div>
+            {/* Submit selected tag ids with the form */}
+            {[...selectedTags].map((id) => (
+              <input key={id} type="hidden" name="tagIds" value={id} />
+            ))}
+            <p className="text-xs text-gray-400 mt-1.5">Click a tag to toggle it on or off.</p>
+          </>
         )}
       </div>
 
