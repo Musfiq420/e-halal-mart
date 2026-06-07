@@ -54,14 +54,14 @@ export default function Navbar({ categories = [] }) {
       >
         {/* Top Bar */}
         <div className="bg-dark-green text-white text-xs py-1.5">
-          <div className="container mx-auto px-4 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <span className="hidden sm:inline">☪ 100% Halal Certified Products</span>
-              <span className="sm:hidden">☪ Halal Certified</span>
-              <span className="hidden md:inline">• Free Delivery on orders over ৳1000</span>
+          <div className="container mx-auto px-4 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-4 min-w-0">
+              <span className="hidden sm:inline truncate">☪ 100% Halal Certified Products</span>
+              <span className="sm:hidden truncate">☪ Halal Certified</span>
+              <span className="hidden md:inline whitespace-nowrap">• Free Delivery on orders over ৳1000</span>
             </div>
-            <div className="flex items-center gap-3">
-              <a href="tel:+8801234567890" className="hover:text-light-green transition-colors">
+            <div className="flex items-center gap-3 shrink-0">
+              <a href="tel:+8801234567890" className="hover:text-light-green transition-colors whitespace-nowrap">
                 📞 +880 1881-758835
               </a>
             </div>
