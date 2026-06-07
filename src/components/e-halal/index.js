@@ -1,4 +1,5 @@
 export { default as Button } from './Button';
+export { default as Markdown } from './Markdown';
 export { default as Badge, HalalBadge, OrganicBadge, NewBadge, SaleBadge, TagBadge } from './Badge';
 export { default as ProductCard, ProductCardSkeleton } from './ProductCard';
 export { default as CategoryCard, CategoryCardCompact, CategoryCardSkeleton } from './CategoryCard';

@@ -107,3 +107,39 @@ export async function getCategories() {
   });
   return categories.map(mapCategory);
 }
+
+// ---------------------------------------------------------------------------
+// Blog
+// ---------------------------------------------------------------------------
+
+export async function getPublishedPosts() {
+  return prisma.blogPost.findMany({
+    where: { published: true },
+    orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+    include: {
+      author: { select: { name: true } },
+      _count: { select: { likes: true, comments: true } },
+    },
+  });
+}
+
+export async function getPostBySlug(slug) {
+  return prisma.blogPost.findUnique({
+    where: { slug },
+    include: {
+      author: { select: { name: true } },
+      _count: { select: { likes: true, comments: true } },
+      comments: {
+        orderBy: { createdAt: "desc" },
+        include: { user: { select: { name: true, image: true } } },
+      },
+    },
+  });
+}
+
+export async function getUserLike(postId, userId) {
+  if (!userId) return null;
+  return prisma.blogLike.findUnique({
+    where: { postId_userId: { postId, userId } },
+  });
+}

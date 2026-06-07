@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { uploadImage } from "@/lib/supabase";
+import { uploadImage, deleteImages } from "@/lib/supabase";
 import { requireAdmin } from "@/lib/auth-helpers";
 import { logAudit, diff } from "@/lib/audit";
 
@@ -101,6 +101,7 @@ export async function deleteCategory(formData) {
     .then(() => true)
     .catch(() => false);
   if (deleted && existing) {
+    await deleteImages([existing.image]);
     await logAudit({
       action: "DELETE",
       entity: "Category",

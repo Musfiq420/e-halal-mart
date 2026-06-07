@@ -3,27 +3,9 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import { Button, ProductCard, NewBadge, TagBadge } from '@/components/e-halal';
+import { Button, ProductCard, NewBadge, TagBadge, Markdown } from '@/components/e-halal';
 import { useCart } from '@/context/CartContext';
 import { useToast } from '@/context/ToastContext';
-
-// Map Markdown elements to Tailwind-styled tags (avoids a typography plugin).
-const mdComponents = {
-  h1: (p) => <h3 className="text-lg font-bold text-gray-900 mt-4 mb-2" {...p} />,
-  h2: (p) => <h3 className="text-base font-bold text-gray-900 mt-4 mb-2" {...p} />,
-  h3: (p) => <h4 className="font-semibold text-gray-900 mt-3 mb-1" {...p} />,
-  p: (p) => <p className="mb-3 last:mb-0" {...p} />,
-  ul: (p) => <ul className="list-disc pl-5 mb-3 space-y-1" {...p} />,
-  ol: (p) => <ol className="list-decimal pl-5 mb-3 space-y-1" {...p} />,
-  strong: (p) => <strong className="font-semibold text-gray-900" {...p} />,
-  em: (p) => <em className="italic" {...p} />,
-  a: (p) => <a className="text-primary underline" target="_blank" rel="noopener noreferrer" {...p} />,
-  blockquote: (p) => (
-    <blockquote className="border-l-4 border-gray-200 pl-4 italic text-gray-500 my-3" {...p} />
-  ),
-};
 
 export default function ProductDetailClient({ product, relatedProducts = [] }) {
   return (
@@ -49,15 +31,11 @@ export default function ProductDetailClient({ product, relatedProducts = [] }) {
         {/* Product Description */}
         <div className="mt-8 bg-white rounded-2xl p-6">
           <h2 className="text-xl font-bold text-gray-900 mb-4">Description</h2>
-          <div className="text-gray-600 leading-relaxed">
-            {product.description ? (
-              <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>
-                {product.description}
-              </ReactMarkdown>
-            ) : (
-              <p className="text-gray-400">No description provided.</p>
-            )}
-          </div>
+          {product.description ? (
+            <Markdown className="text-gray-600 leading-relaxed">{product.description}</Markdown>
+          ) : (
+            <p className="text-gray-400">No description provided.</p>
+          )}
 
           {product.nutritionInfo && (
             <div className="mt-6">

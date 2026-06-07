@@ -50,3 +50,33 @@ export async function uploadImage(file, folder = "uploads") {
   const { data } = supabaseAdmin.storage.from(bucket).getPublicUrl(path);
   return data.publicUrl;
 }
+
+// Extract the in-bucket storage path from a public URL, or null if the URL is
+// not one of our uploaded files (e.g. a seeded /public path or an Unsplash URL).
+function storagePath(url) {
+  if (!url || typeof url !== "string") return null;
+  const marker = `/storage/v1/object/public/${bucket}/`;
+  const idx = url.indexOf(marker);
+  if (idx === -1) return null;
+  const path = decodeURIComponent(url.slice(idx + marker.length));
+  return path || null;
+}
+
+/**
+ * Best-effort delete of one or more uploaded images from Supabase Storage.
+ * Accepts public URLs (or an array of them); non-Supabase URLs are ignored.
+ * Never throws — a storage hiccup must not block the DB delete.
+ *
+ * @param {string|string[]} urls
+ */
+export async function deleteImages(urls) {
+  if (!supabaseAdmin) return;
+  const list = Array.isArray(urls) ? urls : [urls];
+  const paths = [...new Set(list.map(storagePath).filter(Boolean))];
+  if (paths.length === 0) return;
+
+  const { error } = await supabaseAdmin.storage.from(bucket).remove(paths);
+  if (error) {
+    console.error("Image delete failed:", error.message);
+  }
+}

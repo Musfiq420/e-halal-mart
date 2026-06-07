@@ -38,6 +38,7 @@ export default function Navbar({ categories = [] }) {
     { href: '/products', label: 'Products' },
     { href: '/products?filter=traditional', label: 'Traditional' },
     { href: '/products?filter=new', label: 'New Arrivals' },
+    { href: '/blog', label: 'Blog' },
   ];
 
   return (

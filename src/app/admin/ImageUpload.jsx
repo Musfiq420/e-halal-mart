@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /**
  * Styled image picker with drag-and-drop + preview. Wraps a real
@@ -13,6 +13,7 @@ import { useRef, useState } from "react";
  */
 export default function ImageUpload({ name = "image", defaultPreview = null, helpText }) {
   const inputRef = useRef(null);
+  const fileRef = useRef(null); // the chosen File, kept across form resets
   const [preview, setPreview] = useState(defaultPreview);
   const [fileName, setFileName] = useState("");
   const [dragOver, setDragOver] = useState(false);
@@ -21,9 +22,29 @@ export default function ImageUpload({ name = "image", defaultPreview = null, hel
 
   const applyFile = (file) => {
     if (!file || !file.type.startsWith("image/")) return;
+    fileRef.current = file;
     setPreview(URL.createObjectURL(file));
     setFileName(file.name);
   };
+
+  // React 19 auto-resets the <form> after a server action (even on a returned
+  // error), clearing the file input while the preview still shows the image.
+  // Re-attach the chosen file after any reset so the user need not pick it again.
+  useEffect(() => {
+    const form = inputRef.current?.form;
+    if (!form) return;
+    const restore = () =>
+      setTimeout(() => {
+        const f = fileRef.current;
+        if (f && inputRef.current && inputRef.current.files.length === 0) {
+          const dt = new DataTransfer();
+          dt.items.add(f);
+          inputRef.current.files = dt.files;
+        }
+      }, 0);
+    form.addEventListener("reset", restore);
+    return () => form.removeEventListener("reset", restore);
+  }, []);
 
   const onInputChange = (e) => {
     const f = e.target.files?.[0];
@@ -46,6 +67,7 @@ export default function ImageUpload({ name = "image", defaultPreview = null, hel
 
   const reset = () => {
     if (inputRef.current) inputRef.current.value = "";
+    fileRef.current = null;
     setFileName("");
     setPreview(defaultPreview); // revert to the existing image (or empty)
   };
